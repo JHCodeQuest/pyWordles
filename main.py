@@ -1,6 +1,9 @@
-def load_words(all_words):
+def load_words():
     with open('words.txt', 'r') as f:
-        all_words = [line.strip().lower() for line in file if len(line.strip()) == 5]
+        words = [line.strip().lower() for line in f if len(line.strip()) == 5]
+    return words #sends list out of the function
+
+all_words = load_words()
 
 print(f"Loaded {len(all_words)} words!")
 
