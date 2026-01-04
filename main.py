@@ -80,9 +80,27 @@ def solve_wordle():
     if len(all_words) == 1:
         print(f"The answer must be: {all_words[0].upper()}")
 
+def get_feedback_pattern():
+    pass
 
 def calculate_entropy(guess, possible_words):
-    pass
+    #dictonary to count how many words fall into each feedback bucket
+    buckets = {}
+
+    for word in possible_words:
+        #resue a simplified version of thw feedback logic
+        pattern = get_feedback_pattern(guess, word)
+        buckets[pattern] = buckets.get(pattern, 0) + 1
+    
+    entropy = 0
+    total_words = len(possible_words)
+
+    for count in buckets.values():
+        probability = count / total_words
+        # Shannon Entropy formula: p * log2(1/p)
+        entropy += probability * math.log2(1 / probability)
+
+    
 
 
 def get_best_word_entropy(possible_words, allowed_guesses):
