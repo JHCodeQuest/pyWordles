@@ -1,6 +1,8 @@
 import math
 import requests
 from datetime import datetime
+import json
+import os
 
 def ensure_word_in_dictionary(word, filename='words.txt'):
     """Checks if the NYT word is in your list; if not, adds it to the file."""
@@ -35,6 +37,12 @@ def get_nyt_wordle_word():
     except Exception as e:
         print(f"Could not fetch NYT word: {e}")
         return None
+
+def load_cache():
+    if os.path.exists('cache.json'):
+        with open('cache.json', 'r') as f:
+            return json.load(f)
+    return {}
 
 
 def get_feedback_pattern(guess, secret):
@@ -96,6 +104,13 @@ def log_result(word, turns):
         f.write(f"{timestamp} | Word: {word.upper()} | Turns: {turns}\n")
     print(f"Result saved to history.txt")
 
+def save_to_cache(pattern, best_word):
+    cache = load_cache()
+    cache[pattern] = best_word
+    with open('cache.json', ' w') as f:
+        json.dump(cache, f)
+
+
 def show_stats():
     """Reads history.txt and calculates the bot's average performance."""
     try:
@@ -136,10 +151,19 @@ def solve_wordle_blind():
         # 1. Bot makes a guess based on the words it THINKs are possible
         if turn == 1:
             guess = "awoke"
-        elif len(all_words) == 1:
-            guess = all_words[0]
+        elif turn == 2:
+            cache = load_cache()
+            #generate the pattern from turn 1 to use as our 'Key'
+            first_pattern = get_feedback_pattern("awoke", actual_answer)
+
+            if first_pattern in cache:
+                print(f"Cache hit! Using pre-calcuated guess for {first_pattern}")
+                guess = cache[first_pattern]
+            else:
+                print(f"New pattern {first_pattern} detected.")
+                guess = get_best_word_entropy(all_words, allowed_guesses)
+                save_to_cache(first_pattern, guess)
         else:
-            print(f"Analyzing {len(all_words)} possibilities...")
             guess = get_best_word_entropy(all_words, allowed_guesses)
 
         # 2. Generate feedback automatically (This is the 'Referee' step)
