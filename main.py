@@ -41,7 +41,7 @@ def ensure_word_in_dictionary(word, filename=WORDS_FILE):
 
 def load_words(filename=WORDS_FILE):
     try:
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             return [line.strip().lower() for line in f if len(line.strip()) == 5]
     except FileNotFoundError:
         return []
