@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 
 def load_words(filename='words.txt'):
     """Loads 5-letter words from a file."""
@@ -61,6 +62,13 @@ def get_best_word_entropy(possible_words, allowed_guesses):
     
     return best_word
 
+def log_result(word, turns):
+    """Appends the game result to history.txt with a timestamp."""
+    timestamp  = datetime.now().strftime("%d-%m-%Y %H:%M")
+    with open('history.txt', 'a') as f:
+        f.write(f"{timestamp} | Word: {word.upper()} | Turns: {turns}\n")
+    print(f"Result saved to history.txt")
+
 def solve_wordle():
     # Load your word lists
     all_words = load_words('words.txt')
@@ -103,6 +111,8 @@ def solve_wordle():
         print(f"Remaining possibilities: {len(all_words)}")
         if len(all_words) <= 5:
             print(f"Potential answers: {all_words}")
+
+
 
 # Start the bot
 if __name__ == "__main__":
