@@ -98,18 +98,34 @@ def calculate_entropy(guess, possible_words):
         entropy += p * math.log2(1 / p)
     return entropy
 
-def get_best_word_entropy(possible_words, allowed_guesses):
+def get_best_word_entropy(possible_words, allowed_guesses, turn):
+    """
+    Finds the word that provides the highest entropy.
+    Turn 4+ optimization: Forces the bot to guess a word that could actually be the answer.
+    """
     best_word = ""
     max_entropy = -1
-    # Optimization: Use current possibilities if the list is huge to save CPU
-    search_list = allowed_guesses if len(possible_words) < 250 else possible_words
-
+    #early game - look for info
+    #late game (turn 4+) - must pick from possible_words to avoid loops
+    if turn >= 4 or len(possible_words) <= 2:
+        search_list = possible_words
+    else:
+        #If we have many words, we search a subset of 'allowed_guesses' + all 'possible_words'
+        search_list = possible_words if len(possible_words) > 200 else allowed_guesses
+    
     for guess in search_list:
-        e = calculate_entropy(guess, possible_words)
-        if e > max_entropy:
-            max_entropy = e
+        entropy = calculate_entropy(guess, possible_words)
+        # --- DEEP LOOKAHEAD (Mini Version) ---
+        # If a word is a potential answer AND has high entropy, give it a 'bonus'
+        # This prevents the bot from picking a 'utility' word when the answer is obvious
+        if guess in possible_words:
+            entropy += 0.1
+
+        if entropy > max_entropy:
+            max_entropy = entropy
             best_word = guess
-    return best_word
+
+    return best_word     
 
 def log_result(word, turns):
     timestamp = datetime.now().strftime("%d-%m-%Y %H:%M")
