@@ -24,7 +24,13 @@ def is_possible(word, guess, feedback):
 
 
 def get_frequencies(words):
-    pass
+    frequencies = {}
+    for word in words:
+        for letter in word:
+            #If letter is already in dictionary, add 1
+            #If not, start at 0 and add 1
+            frequencies[letter] = frequencies.get(letter, 0) + 1
+    return frequencies
 
 def get_best_word(words):
     pass
