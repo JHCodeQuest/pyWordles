@@ -33,7 +33,23 @@ def get_frequencies(words):
     return frequencies
 
 def get_best_word(words):
-    pass
+    if not words: return None
+
+    freqs = get_frequencies(words)
+    best_word = ""
+    max_score = -1
+
+    for word in words:
+        score = 0
+        #Use set(word) so we only count each unique letter once
+        for letter in set(word):
+            score += freqs[letter]
+        
+        if score > max_score:
+            max_score = score
+            best_word = word
+    
+    return best_word
 
 def solve_wordle():
     #load the dictionary
@@ -41,10 +57,10 @@ def solve_wordle():
 
     while len(all_words) > 1:
         #pick a word
-        guess = all_words[0]
+        guess = get_best_word(all_words)
         print(f"\nBot suggests: {guess.upper()}")
 
-       #Get feedback from YOU
+       #Get feedback
         feedback = input("Enter feedback (0=Gray, 1=Yellow, 2=Green): ")
         
         if feedback == "22222":
