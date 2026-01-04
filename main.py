@@ -186,6 +186,12 @@ def solve_wordle_auto():
         # that is actually in the possible list
         if guess in used_guesses:
             guess = possible_words[0]
+        
+        print(f"{Fore.CYAN}🔎 Possibilities remaining: {len(possible_words)}")
+        if len(possible_words) <= 5:
+            print(f"{Fore.LIGHTBLACK_EX}   Potential answers: {', '.join(possible_words)}")
+            
+        guess = get_best_word_entropy(possible_words, all_words, turn)
 
         # --- 3. EXECUTE GUESS & SHOW JUICE ---
         feedback = get_feedback_pattern(guess, actual_answer)
