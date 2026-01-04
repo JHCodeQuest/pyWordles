@@ -107,11 +107,11 @@ def get_best_word_entropy(possible_words, allowed_guesses, turn):
     max_entropy = -1
     #early game - look for info
     #late game (turn 4+) - must pick from possible_words to avoid loops
-    if turn >= 4 or len(possible_words) <= 2:
+    if turn >= 4:
         search_list = possible_words
     else:
         #If we have many words, we search a subset of 'allowed_guesses' + all 'possible_words'
-        search_list = possible_words if len(possible_words) > 200 else allowed_guesses
+        search_list = allowed_guesses if len(possible_words) > 200 else possible_words
     
     for guess in search_list:
         entropy = calculate_entropy(guess, possible_words)
@@ -135,17 +135,24 @@ def log_result(word, turns):
 def solve_wordle_auto():
     print_header()
     actual_answer = get_nyt_wordle_word()
-    if not actual_answer: return
+    if not actual_answer: 
+        print(f"{Fore.RED}Failed to fetch today's word.")
+        return
 
+    # Self-healing: Ensure target word exists in local dictionary
     ensure_word_in_dictionary(actual_answer)
     all_words = load_words()
     possible_words = all_words.copy()
+    
+    # Track used words to prevent infinite loops
+    used_guesses = set()
     
     print(f"{Fore.YELLOW}Target: NYT Wordle for {datetime.now().strftime('%B %d')}")
     print(f"{Fore.WHITE}Bot Memory: {len(all_words)} words loaded.\n")
 
     turn = 1
-    while True:
+    while turn <= 6:
+        # --- 1. PICK THE GUESS ---
         if turn == 1:
             guess = STARTER_WORD
         elif turn == 2:
@@ -155,27 +162,51 @@ def solve_wordle_auto():
                 print(f"{Fore.CYAN}🚀 Cache Hit! Using pre-calculated move...")
                 guess = cache[first_pattern]
             else:
-                print(f"{Fore.YELLOW}🧠 Calculating optimal Turn 2 response (Thinking...)...")
-                guess = get_best_word_entropy(possible_words, all_words)
-                # Save to cache
+                print(f"{Fore.YELLOW}🧠 Thinking: Turn 2 Entropy Analysis...")
+                guess = get_best_word_entropy(possible_words, all_words, turn)
+                # Update Cache
                 cache[first_pattern] = guess
                 with open(CACHE_FILE, 'w') as f: json.dump(cache, f)
         else:
             print(f"{Fore.YELLOW}🧠 Narrowing down {len(possible_words)} possibilities...")
-            guess = get_best_word_entropy(possible_words, all_words)
+            # Pass turn to the brain so it can adjust its strategy
+            guess = get_best_word_entropy(possible_words, all_words, turn)
 
+        # --- 2. FAILSAFE: PREVENT REPEATS ---
+        # If entropy logic suggests a word already used, pick the highest entropy word 
+        # that is actually in the possible list
+        if guess in used_guesses:
+            guess = possible_words[0]
+
+        # --- 3. EXECUTE GUESS & SHOW JUICE ---
         feedback = get_feedback_pattern(guess, actual_answer)
+        used_guesses.add(guess)
+        
         print(f"{Fore.WHITE}TURN {turn}:")
         print_styled_feedback(guess, feedback)
 
+        # --- 4. WIN CHECK ---
         if guess == actual_answer:
             print(f"{Fore.GREEN}{Style.BRIGHT}✨ SOLVED! The answer was {guess.upper()}.")
             log_result(guess, turn)
             break
             
-        possible_words = [w for w in possible_words if get_feedback_pattern(guess, w) == feedback]
+        # --- 5. FILTER LIST FOR NEXT TURN ---
+        # We filter out the guess we just used AND any words that don't match the colors
+        possible_words = [
+            w for w in possible_words 
+            if get_feedback_pattern(guess, w) == feedback and w not in used_guesses
+        ]
+        
+        if not possible_words:
+            print(f"{Fore.RED}❌ ERROR: No words match this pattern in the current dictionary.")
+            break
+            
         turn += 1
         time.sleep(1.5) # The "Juice" delay
+
+    if turn > 6:
+        print(f"{Fore.RED}💀 Bot failed to solve within 6 turns.")
 
 def load_cache():
     if os.path.exists(CACHE_FILE):
