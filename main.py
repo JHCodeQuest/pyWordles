@@ -1,4 +1,5 @@
 import math
+import requests
 from datetime import datetime
 
 def load_words(filename='words.txt'):
@@ -9,6 +10,20 @@ def load_words(filename='words.txt'):
     except FileNotFoundError:
         print(f"Error: {filename} not found.")
         return []
+
+def get_nyt_wordle_word():
+    """Fetches today's offical NYT Wordle word."""
+    today = datetime.now().strftime("%d-%m-%Y")
+    url = f"https://www.nytimes.com/svc/wordle/v2/{today}.json"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+        return data['solution'].lower()
+    except Exception as e:
+        print(f"Could not fetch NYT word: {e}")
+        return None
+
 
 def get_feedback_pattern(guess, secret):
     """Generates the 0, 1, 2 pattern for a guess against a secret word."""
@@ -87,7 +102,51 @@ def show_stats():
     except (FileNotFoundError, IndexError):
         print("No stats available yet. Win some games first!")
 
-def solve_wordle():
+def solve_wordle_blind():
+    # Load the official NYT word (stored but not shown to the bot logic)
+    actual_answer = get_nyt_wordle_word()
+    
+    if not actual_answer:
+        print("Error fetching NYT word.")
+        return
+
+    # Load your local words list for the bot's 'memory'
+    all_words = load_words('words.txt')
+    allowed_guesses = all_words.copy()
+
+    print(f"--- Bot is solving the NYT Wordle (Answer Hidden) ---")
+    
+    turn = 1
+    while True:
+        # 1. Bot makes a guess based on the words it THINKs are possible
+        if turn == 1:
+            guess = "awoke"
+        elif len(all_words) == 1:
+            guess = all_words[0]
+        else:
+            print(f"Analyzing {len(all_words)} possibilities...")
+            guess = get_best_word_entropy(all_words, allowed_guesses)
+
+        # 2. Generate feedback automatically (This is the 'Referee' step)
+        feedback = get_feedback_pattern(guess, actual_answer)
+        
+        print(f"TURN {turn}: Bot guessed {guess.upper()} | Result: {feedback}")
+
+        # 3. Check for Win
+        if guess == actual_answer:
+            print(f"\n🎯 The Bot solved it! The secret word was: {guess.upper()}")
+            print(f"Score: {turn}/6")
+            log_result(guess, turn)
+            break
+            
+        # 4. Bot updates its brain based on the feedback it just received
+        all_words = [w for w in all_words if get_feedback_pattern(guess, w) == feedback]
+        
+        if not all_words:
+            print("❌ Error: The bot ran out of possibilities. Is the NYT word in your words.txt?")
+            break
+            
+        turn += 1
     # Load your word lists
     all_words = load_words('words.txt')
     if not all_words: return
@@ -138,6 +197,6 @@ def solve_wordle():
 if __name__ == "__main__":
     choice = input("1. Play Wordle\n2. View Stats\nChoice: ")
     if choice == "1":
-        solve_wordle()
+        solve_wordle_blind()
     else:
         show_stats()
