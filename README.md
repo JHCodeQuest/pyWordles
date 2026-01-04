@@ -4,6 +4,18 @@
 - Self-Healing Memory: Automatically updates its local dictionary if a new word is detected in the wild.
 - Persistent Caching: Remembers complex Turn 2 calculations to ensure instant performance.
 - User Friendly: Features a "juiced-up" terminal interface with color-coded feedback and ASCII art.
+The "Blind" Solve: The bot is a true referee. It fetches the NYT word but keeps it a secret, solving the puzzle legally without "cheating" or looking at the answer.
+
+Dynamic Strategy Engine: Most bots just do math. This one has a brain. It switches from Shannon Entropy (Information Gathering) to Win-Probability Targeting in the endgame to close the loop and secure the win.
+
+Self-Learning Dictionary: If the NYT throws a curveball word that isn't in the bot's memory, it automatically detects it and adds it to words.txt. The bot gets smarter every day.
+
+Infinite Loop Protection: Features a "No-Fail" loop fix with used-guess tracking, ensuring the bot never gets stuck repeating the same incorrect word.
+
+Smart Cache: Remembers heavy Turn 2 calculations. If the bot sees a pattern it has solved before, it hits the cache for an instant response.
+
+The "Juice": Fully color-coded terminal output, strategy readouts, and ASCII headers to make the open-source experience look and feel professional.
+
 🛠️ How it Works: The Entropy MathThe bot calculates the expected value of information for every possible word in its dictionary. It uses the Shannon Entropy formula:$$E[G] = \sum_{i=1}^{n} P(x_i) \log_2 \left( \frac{1}{P(x_i)} \right)$$Where:$P(x_i)$ is the probability of a specific green/yellow/gray feedback pattern.The bot chooses the word that results in the most even distribution across "buckets," narrowing down the remaining possibilities as fast as possible.
 🚀 Getting Started
 Prerequisites
