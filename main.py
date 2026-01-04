@@ -73,8 +73,27 @@ def solve_wordle():
     if len(all_words) == 1:
         print(f"The answer must be: {all_words[0].upper()}")
 
-def get_feedback_pattern():
-    pass
+def get_feedback_pattern(guess, secret):
+    """returns a string of 0s, 1s, and 2s, representing the Wordle feedback"""
+    feedback = [0] * 5
+    secret_list = list(secret)
+    guess_list = list(guess)
+
+    #Find greens
+    for i in range(5):
+        if guess_list[i] == secret_list[i]:
+            feedback[i] = 2
+            secret_list[i] = None #Mark used so does not show as yellow
+            guess_list[i] = None
+    
+    #find yellows
+    for i in range(5):
+        if guess_list[i] is not None and guess_list[i] in secret_list:
+            feedback[i] = 1
+            #remove first instance of the letter from secret_list
+            secret_list[secret_list.index(guess_list[i])] = None
+    
+    return "".join(map(str, feedback))
 
 def calculate_entropy(guess, possible_words):
     #dictonary to count how many words fall into each feedback bucket
