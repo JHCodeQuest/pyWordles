@@ -21,3 +21,33 @@ def is_possible(word, guess, feedback):
             if guess[i] in word:
                 return False
     return True
+
+
+
+
+def solve_wordle():
+    #load the dictionary
+    all_words = load_words()
+
+    while len(all_words) > 1:
+        #pick a word
+        guess = all_words[0]
+        print(f"\nBot suggests: {guess.upper()}")
+
+       #Get feedback from YOU
+        feedback = input("Enter feedback (0=Gray, 1=Yellow, 2=Green): ")
+        
+        if feedback == "22222":
+            print("🎉 We got it!")
+            return
+        
+        #filter the list
+        all_words = [word for word in all_words if is_possible(word, guess, feedback)]
+
+        print(f"Words remaining: {len(all_words)}")
+        if len(all_words) < 10:
+            print(f"Possible matches: {all_words}")
+        
+    if len(all_words) == 1:
+        print(f"The answer must be: {all_words[0].upper()}")
+
