@@ -1,3 +1,5 @@
+import math
+
 def load_words():
     with open('words.txt', 'r') as f:
         words = [line.strip().lower() for line in f if len(line.strip()) == 5]
@@ -51,6 +53,7 @@ def get_best_word(words):
     
     return best_word
 
+
 def solve_wordle():
     #load the dictionary
     all_words = load_words()
@@ -77,3 +80,10 @@ def solve_wordle():
     if len(all_words) == 1:
         print(f"The answer must be: {all_words[0].upper()}")
 
+
+def calculate_entropy(guess, possible_words):
+    pass
+
+
+def get_best_word_entropy(possible_words, allowed_guesses):
+    pass
