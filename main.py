@@ -47,16 +47,13 @@ def get_best_word_entropy(possible_words, allowed_guesses):
     return best_word
 
     
-
-
-
 def solve_wordle():
     #load the dictionary
     all_words = load_words()
 
     while len(all_words) > 1:
         #pick a word
-        guess = get_best_word(all_words)
+        guess = get_best_word_entropy(all_words)
         print(f"\nBot suggests: {guess.upper()}")
 
        #Get feedback
