@@ -100,32 +100,41 @@ def calculate_entropy(guess, possible_words):
 
 def get_best_word_entropy(possible_words, allowed_guesses, turn):
     """
-    Finds the word that provides the highest entropy.
-    Turn 4+ optimization: Forces the bot to guess a word that could actually be the answer.
+    Calculates the best guess with a shift in strategy based on the turn.
     """
     best_word = ""
     max_entropy = -1
-    #early game - look for info
-    #late game (turn 4+) - must pick from possible_words to avoid loops
-    if turn >= 4:
-        search_list = possible_words
-    else:
-        #If we have many words, we search a subset of 'allowed_guesses' + all 'possible_words'
-        search_list = allowed_guesses if len(possible_words) > 200 else possible_words
     
+    # STRATEGY SELECTION
+    if turn >= 4:
+        # Turn 4+: Hard Mode - Only pick from words that could be the answer
+        search_list = possible_words
+        strategy_desc = "Final Push (Possible Words Only)"
+    elif len(possible_words) < 10:
+        # Very few words left: Prioritize winning over info gathering
+        search_list = possible_words
+        strategy_desc = "Closing In (Possible Words Only)"
+    else:
+        # Early/Mid game: Check the full dictionary to eliminate the most words
+        search_list = allowed_guesses if len(possible_words) > 200 else possible_words
+        strategy_desc = "Broad Search (Optimal Information)"
+
+    print(f"{Fore.MAGENTA}📡 Strategy: {strategy_desc}")
+
     for guess in search_list:
-        entropy = calculate_entropy(guess, possible_words)
-        # --- DEEP LOOKAHEAD (Mini Version) ---
-        # If a word is a potential answer AND has high entropy, give it a 'bonus'
-        # This prevents the bot from picking a 'utility' word when the answer is obvious
+        e = calculate_entropy(guess, possible_words)
+        
+        # MINI LOOKAHEAD:
+        # If two words have similar entropy, but one is a possible answer, 
+        # give the possible answer a tiny 'win-chance' bonus.
         if guess in possible_words:
-            entropy += 0.1
+            e += 0.1 
 
-        if entropy > max_entropy:
-            max_entropy = entropy
+        if e > max_entropy:
+            max_entropy = e
             best_word = guess
-
-    return best_word     
+    
+    return best_word
 
 def log_result(word, turns):
     timestamp = datetime.now().strftime("%d-%m-%Y %H:%M")
