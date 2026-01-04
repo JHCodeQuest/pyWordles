@@ -23,7 +23,11 @@ def is_possible(word, guess, feedback):
     return True
 
 
+def get_frequencies(words):
+    pass
 
+def get_best_word(words):
+    pass
 
 def solve_wordle():
     #load the dictionary
