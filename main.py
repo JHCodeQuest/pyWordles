@@ -34,24 +34,20 @@ def get_frequencies(words):
             frequencies[letter] = frequencies.get(letter, 0) + 1
     return frequencies
 
-def get_best_word(words):
-    if not words: return None
-
-    freqs = get_frequencies(words)
+def get_best_word_entropy(possible_words, allowed_guesses):
     best_word = ""
-    max_score = -1
+    max_entropy = -1
 
-    for word in words:
-        score = 0
-        #Use set(word) so we only count each unique letter once
-        for letter in set(word):
-            score += freqs[letter]
-        
-        if score > max_score:
-            max_score = score
-            best_word = word
+    for guess in allowed_guesses:
+        e = calculate_entropy(guess, possible_words)
+        if e > max_entropy:
+            max_entropy = e
+            best_word = guess
     
     return best_word
+
+    
+
 
 
 def solve_wordle():
@@ -103,5 +99,3 @@ def calculate_entropy(guess, possible_words):
     
 
 
-def get_best_word_entropy(possible_words, allowed_guesses):
-    pass
