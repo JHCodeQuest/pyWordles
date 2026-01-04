@@ -9,6 +9,9 @@ all_words = load_words()
 
 print(f"Loaded {len(all_words)} words!")
 
+def load_all_guessable_words():
+    pass
+
 def is_possible(word, guess, feedback):
     for i in range(5):
         if feedback[i] == "2": #green
@@ -47,7 +50,6 @@ def get_best_word_entropy(possible_words, allowed_guesses):
     return best_word
 
     
-def solve_wordle():
     #load the dictionary
     all_words = load_words()
 
@@ -113,5 +115,36 @@ def calculate_entropy(guess, possible_words):
         entropy += probability * math.log2(1 / probability)
 
     
+def solve_wordle():
+    all_words = load_words() #list of words
+    allowed_guesses = load_all_guessable_words()
+
+    turn = 1
+    while True:
+        #pick the guess
+        if turn == 1:
+            guess = "awoke" #JHCodeQuest's starter word
+        elif len(all_words) == 1:
+            guess = all_words[0]
+        else:
+            print(f"Best guess from {len(all_words)} is...")
+            guess = get_best_word_entropy(all_words, allowed_guesses)
+        
+        print(f"\Turn {turn} | bot suggests: {guess.upper()}")
+
+        #Get feedback
+        feedback = input("Enter feedback (e.g., 02101): ")
+        if feedback == "22222":
+            print(f"We did it! In {turn} guesses!")
+            break
+
+        #filter the list
+        all_words = [w for w in all_words if get_feedback_pattern(guess, w) == feedback]
+
+        turn += 1
+        if not all_words:
+            print("No words match that feedback. Try again!")
+            break
+
 
 
