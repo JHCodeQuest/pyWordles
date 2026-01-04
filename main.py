@@ -69,6 +69,24 @@ def log_result(word, turns):
         f.write(f"{timestamp} | Word: {word.upper()} | Turns: {turns}\n")
     print(f"Result saved to history.txt")
 
+def show_stats():
+    """Reads history.txt and calculates the bot's average performance."""
+    try:
+        with open('history.txt', 'r') as f:
+            lines = f.readlines()
+            
+        # Extract the number after 'TURNS: ' in each line
+        scores = [int(line.split('TURNS: ')[1]) for line in lines]
+        
+        if scores:
+            avg = sum(scores) / len(scores)
+            print(f"\n--- BOT STATISTICS ---")
+            print(f"Games Played: {len(scores)}")
+            print(f"Average Score: {avg:.2f} turns")
+            print(f"Best Game: {min(scores)}")
+    except (FileNotFoundError, IndexError):
+        print("No stats available yet. Win some games first!")
+
 def solve_wordle():
     # Load your word lists
     all_words = load_words('words.txt')
@@ -97,6 +115,8 @@ def solve_wordle():
         
         if feedback == "22222":
             print(f"🎉 Success! The word was {guess.upper()} in {turn} guesses.")
+            #log the guess
+            log_result(guess, turn)
             break
 
         # STEP 3: Filter the list
@@ -116,4 +136,8 @@ def solve_wordle():
 
 # Start the bot
 if __name__ == "__main__":
-    solve_wordle()
+    choice = input("1. Play Wordle\n2. View Stats\nChoice: ")
+    if choice == "1":
+        solve_wordle()
+    else:
+        show_stats()
