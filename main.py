@@ -2,6 +2,18 @@ import math
 import requests
 from datetime import datetime
 
+def ensure_word_in_dictionary(word, filename='words.txt'):
+    """Checks if the NYT word is in your list; if not, adds it to the file."""
+    with open(filename, 'r') as f:
+        words = [line.strip().lower() for line in f]
+    
+    if word not in words:
+        print(f"✨ New word detected! Adding '{word}' to {filename}...")
+        with open(filename, 'a') as f:
+            f.write(f"\n{word}")
+        return True # We added a word
+    return False # Word was already there
+
 def load_words(filename='words.txt'):
     """Loads 5-letter words from a file."""
     try:
@@ -109,6 +121,9 @@ def solve_wordle_blind():
     if not actual_answer:
         print("Error fetching NYT word.")
         return
+
+    #Safety check: make sure its in our dictionary
+    did_add = ensure_word_in_dictionary(actual_answer, 'words.txt')
 
     # Load your local words list for the bot's 'memory'
     all_words = load_words('words.txt')
