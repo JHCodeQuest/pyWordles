@@ -1,4 +1,4 @@
-# Entropy Wordle Bot 
+sou# Entropy Wordle Bot 
 A high-performance, information-theory-based Wordle solver that "learns" as it plays. This bot uses Shannon Entropy to identify the mathematically optimal guess at any given turn. 
 It automatically fetches the official New York Times Wordle of the Day, simulates a "blind" solve, and logs its performance over time.
 
